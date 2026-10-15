@@ -1,0 +1,44 @@
+name: Deploy
+
+# Deploys to the VPS after the Tests workflow passes on the deploy branch.
+# Needs repository secrets VPS_HOST, VPS_USER, VPS_SSH_KEY (optional VPS_PORT, SITE_URL);
+# without them the job is skipped. See deploy/README.md.
+on:
+  workflow_run:
+    workflows: [Tests]
+    types: [completed]
+    branches: [claude/blissful-knuth-ezhfsh]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      SITE_URL: ${{ secrets.SITE_URL }}
+    steps:
+      - name: Skip when the VPS is not configured
+        if: ${{ env.VPS_HOST == '' }}
+        run: echo "::notice::VPS secrets belum diisi; deploy dilewati."
+
+      - name: Deploy over SSH
+        if: ${{ env.VPS_HOST != '' }}
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: /var/www/sigit_sugara/deploy/deploy.sh
+
+      - name: Smoke test
+        if: ${{ env.VPS_HOST != '' }}
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 -L "${SITE_URL:-http://$VPS_HOST}/")
+          echo "HTTP $code"
+          test "$code" = 200
