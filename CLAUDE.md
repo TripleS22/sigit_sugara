@@ -14,4 +14,7 @@ Tailwind 4, MySQL in production (SQLite works locally/tests). UI text is Indones
 - React Bits components are islands: Blade renders the fallback, `resources/js/islands`
   mounts the component. Pass props with `data-props="{{ json_encode([...]) }}"` (not `@json`).
 - Never seed fake portfolio items, testimonials, ratings, or contact details.
+- Deploy: `deploy/setup-server.sh` (first install on a VPS, idempotent), `deploy/deploy.sh`
+  (updates, also run by `.github/workflows/deploy.yml`), `deploy/backup.sh`. Seeders run only
+  on an empty database so deploys never overwrite CMS content.
 - Checks: `php artisan test`, `vendor/bin/pint --test`, `npm run build`.

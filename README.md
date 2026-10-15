@@ -49,17 +49,16 @@ does): Aurora, BlurText, RotatingText, ShinyText, CountUp, SpotlightCard, LogoLo
 To add more, run `npx shadcn@latest add @react-bits/<Name>-JS-TW` (registry configured
 in `components.json`), then register the component in the islands registry.
 
-## Deploying to shared hosting
+## Deploying
 
-1. Build assets locally (`npm run build`) and upload the project; point the domain's
-   document root to `public/` (or move `public/` contents and adjust paths).
-2. Set `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://…` (HTTPS is forced
-   when `APP_URL` starts with `https://`), DB and MAIL settings in `.env`.
-3. `php artisan migrate --force --seed`, `php artisan storage:link`,
-   `php artisan config:cache route:cache view:cache`.
-4. In the CMS: set the WhatsApp number, contact email, GA4 ID and Search Console code,
-   then submit `/sitemap.xml` in Search Console. Use the launch checklist on the dashboard.
-5. Schedule database + `storage/app/public` backups and test a restore (PRD §12.14).
+**VPS (recommended):** one command provisions Nginx, PHP 8.3, MariaDB, HTTPS, backups and
+the app; later updates deploy automatically from GitHub Actions. See [deploy/README.md](deploy/README.md).
+
+**Shared hosting:** build assets locally (`npm run build`), upload the project with the
+document root on `public/`, set production values in `.env` (`APP_ENV=production`,
+`APP_DEBUG=false`, `APP_URL=https://…`, DB, MAIL), then run `php artisan migrate --force --seed`,
+`php artisan storage:link` and `php artisan optimize`. Schedule database and
+`storage/app/public` backups and test a restore (PRD §12.14).
 
 ## Before launch
 
